@@ -1,6 +1,6 @@
 "use client"
 import { Button, InputNumber, Table, Select } from 'antd'
-import { Option } from 'antd/es/mentions'
+// import { Option } from 'antd/es/mentions'
 import { ColumnsType } from 'antd/es/table'
 import { Plus } from 'lucide-react'
 import React, { useState } from 'react'
@@ -47,6 +47,10 @@ function Bill() {
           placeholder="Select Services"
           value={record.service?.id}
           style={{ width: "100%" }}
+          options={myServices.map(serv => ({
+            label: serv.name,
+            value: serv.id
+          }))}
           onChange={serviceId => {
             const service = myServices.find(s => s.id === serviceId);
             updateRow(record.key, {
@@ -54,13 +58,7 @@ function Bill() {
               price: service?.price
             })
           }}
-        >
-          {myServices.map(service => (
-            <Option key={service.id} value={service.id}>
-              {service.name}
-            </Option>
-          ))}
-        </Select>
+        />
       )
     },
     {

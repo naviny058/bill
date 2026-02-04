@@ -76,8 +76,9 @@ function Invoice({ clientName, clientPhoneNum, workDone }: InvoiceProps) {
             style={{
               backgroundColor: "#ffffff",
               color: "#000000",
+              width: "440px"
             }}
-            className='invoice  w-md p-4'>
+            className='invoice p-4'>
             <h2 className='text-center my-7'>{users[users.length - 1].shopName || "Near Hospital chouk,Binugarh,Hazaribag"}</h2>
             <div className="grid grid-cols-2 my-20 justify-between">
               <div className='max-w-32'>

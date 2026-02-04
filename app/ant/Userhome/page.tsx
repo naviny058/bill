@@ -91,11 +91,14 @@ const ShopForm: React.FC = () => {
             />
           </div>
           <div className="text-right">
-            {/* <Link
-              href={'/ant/Bill'}
-            > */}
             <button className="text-right bg-white text-black rounded-md py-2 px-4" type="submit">Submit</button>
-            {/* </Link> */}
+            <br />
+            <Link
+              href={'/ant/Bill'}
+            >
+              <button className="text-right bg-white text-black rounded-md py-2 mt-4 px-4" type="submit">Go to Billing page</button>
+            </Link>
+
           </div>
         </form>
       </div>

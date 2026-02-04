@@ -1,7 +1,7 @@
 "use client"
 import { Button, InputNumber, Table, Select, Input } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { Plus } from 'lucide-react'
+import { DeleteIcon, Plus, Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 import Invoice from '../Invoice'
 
@@ -25,11 +25,26 @@ interface RowData {
   service?: Services;
   price: number;
   isEditing: boolean;
+  isSpecial?: boolean;
+  specialName?: string;
 }
 function Bill() {
   const [RowData, setRowData] = useState<RowData[]>([])
   const [clientName, setClientName] = useState("")
   const [clientPhoneNum, setClientPhoneNum] = useState<number | null>(null)
+
+  const addSpecialService = () => {
+    setRowData(prev => [
+      ...prev,
+      {
+        key: prev.length,
+        price: 0,
+        isEditing: false,
+        isSpecial: true,
+        specialName: "",
+      },
+    ])
+  }
 
   const addServices = () => {
     setRowData(prev => [
@@ -49,55 +64,71 @@ function Bill() {
       title: "Services 🛠️",
       dataIndex: "service",
       key: "service",
-      render: (_: unknown, record: RowData) => (
-        <Select
-          placeholder="Select Services"
-          value={record.service?.id}
-          style={{ width: "100%" }}
-          options={myServices.map(serv => ({
-            label: serv.name,
-            value: serv.id
-          }))}
-          onChange={serviceId => {
-            const service = myServices.find(s => s.id === serviceId);
-            updateRow(record.key, {
-              service,
-              price: service?.price
-            })
-          }}
-        />
-      )
+      render: (_: unknown, record: RowData) => {
+        if (record.isSpecial) {
+          return (
+            <Input
+              placeholder="Special service name"
+              value={record.specialName}
+              onChange={(e) =>
+                updateRow(record.key, { specialName: e.target.value })
+              }
+            />
+          )
+        }
+
+        return (
+          <Select
+            placeholder="Select Services"
+            value={record.service?.id}
+            style={{ width: "100%" }}
+            options={myServices.map(serv => ({
+              label: serv.name,
+              value: serv.id,
+            }))}
+            onChange={serviceId => {
+              const service = myServices.find(s => s.id === serviceId)
+              updateRow(record.key, {
+                service,
+                price: service?.price ?? 0,
+              })
+            }}
+          />
+        )
+      },
     },
     {
-      title: "Price  ₹",
+      title: "Price ₹",
       dataIndex: "price",
       key: "price",
-      render: (_: unknown, record: RowData) =>
-        record.isEditing ? (
-          <InputNumber
-            value={record.price}
-            autoFocus
-            style={{ width: "100%" }}
-            onBlur={() => updateRow(record.key, { isEditing: false })}
-            onChange={value => updateRow(record.key, { price: value ?? 0 })}
-          />
-        ) : (
-          <div
-            onDoubleClick={() => updateRow(record.key, { isEditing: true })}
-            style={{ cursor: "pointer" }}
-          >
-            {record.price}
-          </div>
-        )
-    }
+      render: (_: unknown, record: RowData) => (
+        <InputNumber
+          value={record.price}
+          style={{ width: "100%" }}
+          onChange={(value) =>
+            updateRow(record.key, { price: value ?? 0 })
+          }
+        />
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <div onClick={() => setRowData(pre => pre.filter(row => row.key !== record.key))}><Trash2 color='red' /></div>
+      ),
+    },
   ]
   const workDone: Services[] = RowData
-    .filter(row => row.service)
+    .filter(row => row.service || row.isSpecial)
     .map(row => ({
-      name: row.service!.name,
+      name: row.isSpecial
+        ? row.specialName || "Special Service"
+        : row.service!.name,
       price: row.price,
-      id: row.service!.id,
+      id: row.isSpecial ? Date.now() : row.service!.id,
     }))
+
 
   return (
     <div className='max-w-2xl mx-auto space-y-4'>
@@ -107,11 +138,16 @@ function Bill() {
         clientPhoneNum={clientPhoneNum}
         setClientPhoneNum={setClientPhoneNum}
       />
-      <div>
+      <div className='space-x-4'>
         <Button
           onClick={addServices}
           icon={<Plus />}
         >Add Services</Button>
+
+        <Button
+          onClick={addSpecialService}
+          icon={<Plus />}
+        >Add Special Services</Button>
       </div>
 
       <Table<RowData>

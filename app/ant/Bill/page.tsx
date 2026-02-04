@@ -1,14 +1,19 @@
 "use client"
-import { Button, InputNumber, Table, Select } from 'antd'
-// import { Option } from 'antd/es/mentions'
+import { Button, InputNumber, Table, Select, Input } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { Plus } from 'lucide-react'
 import React, { useState } from 'react'
+import Invoice from '../Invoice'
 
 interface Services {
   name: string,
   price: number,
   id: number
+}
+interface Invoice {
+  clientName: string,
+  clientPhoneNum: number,
+  workDone: Services[]
 }
 const myServices: Services[] = [
   { name: "Bike Wash", price: 50, id: 1 },
@@ -23,6 +28,8 @@ interface RowData {
 }
 function Bill() {
   const [RowData, setRowData] = useState<RowData[]>([])
+  const [clientName, setClientName] = useState("")
+  const [clientPhoneNum, setClientPhoneNum] = useState<number | null>(null)
 
   const addServices = () => {
     setRowData(prev => [
@@ -84,20 +91,74 @@ function Bill() {
         )
     }
   ]
+  const workDone: Services[] = RowData
+    .filter(row => row.service)
+    .map(row => ({
+      name: row.service!.name,
+      price: row.price,
+      id: row.service!.id,
+    }))
+
   return (
     <div className='max-w-2xl mx-auto space-y-4'>
-      <Button
-        onClick={addServices}
-        icon={<Plus />}
-      >Add Services</Button>
+      <ClientDetails
+        clientName={clientName}
+        setClientName={setClientName}
+        clientPhoneNum={clientPhoneNum}
+        setClientPhoneNum={setClientPhoneNum}
+      />
+      <div>
+        <Button
+          onClick={addServices}
+          icon={<Plus />}
+        >Add Services</Button>
+      </div>
 
       <Table<RowData>
         columns={columns}
         dataSource={RowData}
         pagination={false}
       />
+      <div className='relative'>
+        {RowData && <span className='p-4 rounded-md absolute right-0 border-2 border-white'>
+          {RowData.reduce((acc, data) => (data.price + acc), 0)}
+        </span>}
+      </div>
+      <Invoice
+        clientName={clientName}
+        clientPhoneNum={clientPhoneNum}
+        workDone={workDone}
+      />
     </div>
   )
 }
+function ClientDetails({
+  clientName,
+  setClientName,
+  clientPhoneNum,
+  setClientPhoneNum,
+}: {
+  clientName: string
+  setClientName: (val: string) => void
+  clientPhoneNum: number | null
+  setClientPhoneNum: (val: number | null) => void
+}) {
 
+  return (
+    <div className='max-w-80! space-y-4!'>
+      <Input
+        placeholder="Client Name"
+        value={clientName}
+        onChange={(e) => setClientName(e.target.value)}
+      />
+      <InputNumber
+        maxLength={10}
+        style={{ width: 320 }}
+        placeholder="Client Phone Number"
+        value={clientPhoneNum ?? undefined}
+        onChange={(value) => setClientPhoneNum(value)}
+      />
+    </div>
+  )
+}
 export default Bill
